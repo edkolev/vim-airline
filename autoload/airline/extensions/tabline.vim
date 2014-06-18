@@ -112,19 +112,25 @@ endfunction
 
 function! s:get_buffer_list()
   let buffers = []
+
+  redir => ls_output
+  silent ls
+  redir END
+
+  let all_buffers = split(ls_output, '\n')
+  call map(all_buffers, 'substitute(v:val, "\\s*\\(\\d\\+\\).*", "\\1", "")')
+
   let cur = bufnr('%')
-  for nr in range(1, bufnr('$'))
-    if buflisted(nr) && bufexists(nr)
-      for ex in s:excludes
-        if match(bufname(nr), ex)
-          continue
-        endif
-      endfor
-      if getbufvar(nr, 'current_syntax') == 'qf'
+  for nr in all_buffers
+    for ex in s:excludes
+      if match(bufname(nr), ex)
         continue
       endif
-      call add(buffers, nr)
+    endfor
+    if getbufvar(nr, 'current_syntax') == 'qf'
+      continue
     endif
+    call add(buffers, nr)
   endfor
 
   let s:current_buffer_list = buffers
