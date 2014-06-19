@@ -118,6 +118,7 @@ function! s:get_buffer_list()
   redir END
 
   let all_buffers = split(ls_output, '\n')
+  call filter(all_buffers, 'stridx(v:val, ''"[Quickfix List]"'') == -1')
   call map(all_buffers, 'substitute(v:val, "\\s*\\(\\d\\+\\).*", "\\1", "")')
 
   let cur = bufnr('%')
@@ -127,9 +128,6 @@ function! s:get_buffer_list()
         continue
       endif
     endfor
-    if getbufvar(nr, 'current_syntax') == 'qf'
-      continue
-    endif
     call add(buffers, nr)
   endfor
 
